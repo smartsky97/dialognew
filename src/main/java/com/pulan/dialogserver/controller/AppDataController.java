@@ -184,7 +184,8 @@ public class AppDataController {
      * @return
      */
     @RequestMapping(value = "/getAttendanceResult", method = RequestMethod.POST)
-    public ReturnMsg getAttendanceResult(HttpServletRequest request, @RequestParam(required = false, value = "data") String data) {
+    public ReturnMsg getAttendanceResult(HttpServletRequest request, @RequestParam(required = false, value = "data") String data
+            ,@RequestParam(required = false, value = "mail_name") String mail_name) {
         ReturnMsg returnMsg = new ReturnMsg();
         returnMsg.setType("attendanceResult");
         try {
@@ -194,8 +195,14 @@ public class AppDataController {
                 returnMsg.setResp("session已过期");
                 return returnMsg;
             } else {
+                String name ="";
                 User user = (User) session.getAttribute("user");
-                returnMsg.setResp(jdbcMysql_78.getAttendanceResult(user.getMail_name(), data));
+                if (!StringUtils.isEmpty(mail_name)) {
+                    name = mail_name;
+                }else {
+                    name = user.getMail_name();
+                }
+                returnMsg.setResp(jdbcMysql_78.getAttendanceResult(name, data));
                 return returnMsg;
             }
 

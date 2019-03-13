@@ -335,7 +335,7 @@ public class JdbcUtils {
     //查询网页地址。
     public String getNetUrl(String webName) {
         String rest;
-        String sql = "select web_url from ai_web_url where url_name =? ";
+        String sql = "select web_url from ai_web_url where url_name =? limit 1";
         try {
             rest = jdbcTemplate.queryForObject(sql, String.class, webName);
         } catch (Exception e) {

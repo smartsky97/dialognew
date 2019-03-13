@@ -12,6 +12,7 @@ import com.pulan.dialogserver.utils.RedisClient;
 import org.apache.ibatis.annotations.Param;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -51,21 +52,28 @@ public class MenuController {
      */
 
     @RequestMapping(value = "/getAttendance")
-    public Object getAttendances(HttpServletRequest request, @RequestParam(required = false, value = "data") String data) {
+    public Object getAttendances(HttpServletRequest request, @RequestParam(required = false, value = "data") String data,
+                                 @RequestParam(required = false, value = "mail_name") String mail_name) {
         ReturnMsg returnMsg = new ReturnMsg();
         try {
             returnMsg.setType("attendance");
             HttpSession session = request.getSession(false);
             if (session != null) {
-                User user = (User) session.getAttribute("user");
+                String name = "";
+                if (!StringUtils.isEmpty(mail_name)) {
+                    name = mail_name;
+                } else {
+                    User user = (User) session.getAttribute("user");
+                    name = user.getMail_name();
+                }
 
-                AttendanceMsg attendanceMsg = jdbcMysql_78.getAttendanceMsg(user.getMail_name(), data);
+                AttendanceMsg attendanceMsg = jdbcMysql_78.getAttendanceMsg(name, data);
                 if (attendanceMsg != null) {
                     returnMsg.setResp(JSON.toJSON(attendanceMsg));
                 } else {
                     returnMsg.setResp("查无数据");
                 }
-                logger.info("查询考勤列表成功. userName:" + user.getMail_name() + " date:" + data);
+                logger.info("查询考勤列表成功. userName:" + name + " date:" + data);
             } else {
                 returnMsg.setStatus(-1);
                 returnMsg.setResp("session过期");
@@ -361,21 +369,28 @@ public class MenuController {
      * @return
      */
     @RequestMapping(value = "/getAttendanceMsgByDay", method = RequestMethod.GET)
-    public ReturnMsg getAttendanceMsgByDay(HttpServletRequest request, @RequestParam(value = "data") String data) {
+    public ReturnMsg getAttendanceMsgByDay(HttpServletRequest request, @RequestParam(value = "data") String data
+            , @RequestParam(value = "mail_name",required = false) String mail_name) {
         ReturnMsg returnMsg = new ReturnMsg();
         try {
             returnMsg.setType("attendance");
             HttpSession session = request.getSession(false);
             if (session != null) {
-                User user = (User) session.getAttribute("user");
+                String name = "";
+                if (!StringUtils.isEmpty(mail_name)) {
+                    name = mail_name;
+                } else {
+                    User user = (User) session.getAttribute("user");
+                    name = user.getMail_name();
+                }
 
-                AttendanceDayMsg attendanceDayMsg = jdbcMysql_78.getAttendanceMsgByDay(user.getMail_name(), data);
+                AttendanceDayMsg attendanceDayMsg = jdbcMysql_78.getAttendanceMsgByDay(name, data);
                 if (attendanceDayMsg != null) {
                     returnMsg.setResp(JSON.toJSON(attendanceDayMsg));
                 } else {
                     returnMsg.setResp("查无数据");
                 }
-                logger.info("查询每日考勤成功. userName:" + user.getMail_name() + " date:" + data);
+                logger.info("查询每日考勤成功. userName:" + name + " date:" + data);
             } else {
                 returnMsg.setStatus(-1);
                 returnMsg.setResp("session过期");

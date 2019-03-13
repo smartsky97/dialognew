@@ -675,7 +675,7 @@ public class SkillsResImpl implements ISkillsResService {
         } else {
             mailtoken = jsonObject.get("data").toString();
         }*/
-        mailtoken = "57f42e355dcc4041919ccb0269260675";
+        mailtoken = "12ef14875aee4ecdb4cc00d5a8332931";
         String sendemail = "http://192.168.0.67:9104/jq-exchange/send";
 
         String[] tos = to;
@@ -756,6 +756,7 @@ public class SkillsResImpl implements ISkillsResService {
             String slot_value;
             for (SemanticSlots slot : slotList) {
                 String slot_code = slot.getSlotName();
+                //todo
                 switch (slot_code) {
                     case "person":
                         remindObj.put("alias", my_imei);
@@ -784,8 +785,13 @@ public class SkillsResImpl implements ISkillsResService {
                         break;
                     default:
                         slot_value = slot.getSlotValue();
-                        remindObj.put("other", slot_value);
-                        break;
+                        if ("107101".equals(slot.getSlotId())) {
+                            remindObj.put("reminder_time", slot_value);
+                            break;
+                        } else {
+                            remindObj.put("other", slot_value);
+                            break;
+                        }
                 }
                 if (isError) {
                     break;
@@ -1074,13 +1080,21 @@ public class SkillsResImpl implements ISkillsResService {
                     returnMsg.setType("saturation");
                     date = DateUtils.getStringForDateString(info[3], "yyyyMMdd", "yyyy-MM-dd");
                     SaturationMsg saturationMsg = jdbcMysql_78.getSaturationMsg(info[2], date);
-                    returnMsg.setResp(saturationMsg);
+                    if (saturationMsg == null) {
+                        returnMsg.setResp("暂无数据");
+                    } else {
+                        returnMsg.setResp(saturationMsg);
+                    }
                     break;
                 case "attendance":
                     returnMsg.setType("attendance");
                     date = DateUtils.getStringForDateString(info[3], "yyyyMMdd", "yyyy-MM");
                     AttendanceMsg attendanceMsg = jdbcMysql_78.getAttendanceMsg(info[2], date);
-                    returnMsg.setResp(attendanceMsg);
+                    if (attendanceMsg == null) {
+                        returnMsg.setResp("暂无数据");
+                    } else {
+                        returnMsg.setResp(attendanceMsg);
+                    }
                     break;
                 case "meeting":
                     returnMsg.setType("meeting");
@@ -1090,12 +1104,20 @@ public class SkillsResImpl implements ISkillsResService {
                         date =simpleDateFormat.format(new Date());
                     }
                     List<MeetingInfo> meetingInfoList = jdbcMysql_78.getMeeting(info[2], date);
-                    returnMsg.setResp(meetingInfoList);
+                    if (meetingInfoList == null) {
+                        returnMsg.setResp("暂无数据");
+                    } else {
+                        returnMsg.setResp(meetingInfoList);
+                    }
                     break;
                 case "review":
                     returnMsg.setType("toRead");
                     List<ReviewMsg> reviewMsgList = jdbcMysql_78.queryReview(info[2]);
-                    returnMsg.setResp(reviewMsgList);
+                    if (reviewMsgList == null) {
+                        returnMsg.setResp("暂无数据");
+                    } else {
+                        returnMsg.setResp(reviewMsgList);
+                    }
                     break;
                 case "schedule":
                     returnMsg.setType("schedule");
@@ -1105,12 +1127,20 @@ public class SkillsResImpl implements ISkillsResService {
                         date =simpleDateFormat.format(new Date());
                     }
                     List<CalendarMsg> calendarMsgList = jdbcMysql_78.getCalendar(info[2], date);
-                    returnMsg.setResp(calendarMsgList);
+                    if (calendarMsgList == null) {
+                        returnMsg.setResp("暂无数据");
+                    } else {
+                        returnMsg.setResp(calendarMsgList);
+                    }
                     break;
                 case "task":
                     returnMsg.setType("todo");
                     List<TodoInfo> todoInfoLists = jdbcMysql_78.queryTodoList(info[2]);
-                    returnMsg.setResp(todoInfoLists);
+                    if (todoInfoLists == null) {
+                        returnMsg.setResp("暂无数据");
+                    } else {
+                        returnMsg.setResp(todoInfoLists);
+                    }
                     break;
                 default:
                     resultObj = getResult(null);
