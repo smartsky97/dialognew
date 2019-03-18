@@ -96,21 +96,28 @@ public class MenuController {
      * @return
      */
     @RequestMapping(value = "/saturation")
-    public ReturnMsg saturations(HttpServletRequest request, @RequestParam(required = false, value = "data") String data) {
+    public ReturnMsg saturations(HttpServletRequest request, @RequestParam(required = false, value = "data") String data
+            , @RequestParam(required = false, value = "mail_name") String mail_name) {
         ReturnMsg returnMsg = new ReturnMsg();
         try {
             returnMsg.setType("saturation");
             HttpSession session = request.getSession(false);
             if (session != null) {
-                User user = (User) session.getAttribute("user");
+                String name = "";
+                if (!StringUtils.isEmpty(mail_name)) {
+                    name = mail_name;
+                } else {
+                    User user = (User) session.getAttribute("user");
+                    name = user.getMail_name();
+                }
 
-                SaturationMsg saturationMsg = jdbcMysql_78.getSaturationMsg(user.getMail_name(), data);
+                SaturationMsg saturationMsg = jdbcMysql_78.getSaturationMsg(name, data);
                 if (saturationMsg != null) {
                     returnMsg.setResp(JSON.toJSON(saturationMsg));
                 } else {
                     returnMsg.setResp("查无数据");
                 }
-                logger.info("查询饱和度成功. userName:" + user.getMail_name() + " date:" + data);
+                logger.info("查询饱和度成功. userName:" + mail_name + " date:" + data);
             } else {
                 returnMsg.setStatus(-1);
                 returnMsg.setResp("session过期");
@@ -133,7 +140,8 @@ public class MenuController {
      * @return
      */
     @RequestMapping(value = "/task", method = RequestMethod.POST)
-    public ReturnMsg task(HttpServletRequest request, @RequestParam(required = false, value = "date") String date) {
+    public ReturnMsg task(HttpServletRequest request, @RequestParam(required = false, value = "date") String date
+            , @RequestParam(required = false, value = "mail_name") String mail_name) {
         ReturnMsg returnMsg = new ReturnMsg();
         returnMsg.setType("todo");
         try {
@@ -143,10 +151,16 @@ public class MenuController {
                 returnMsg.setResp("session已过期");
                 return returnMsg;
             } else {
-                User user = (User) session.getAttribute("user");
-                returnMsg.setResp(jdbcMysql_78.queryTodoList(user.getMail_name()));
+                String name = "";
+                if (!StringUtils.isEmpty(mail_name)) {
+                    name = mail_name;
+                } else {
+                    User user = (User) session.getAttribute("user");
+                    name = user.getMail_name();
+                }
+                returnMsg.setResp(jdbcMysql_78.queryTodoList(name));
                 returnMsg.setStatus(0);
-                logger.info("查询待办列表成功. userName:" + user.getMail_name() + " date:" + date);
+                logger.info("查询待办列表成功. userName:" + name + " date:" + date);
             }
         } catch (Exception e) {
             returnMsg.setStatus(-1);
@@ -194,7 +208,8 @@ public class MenuController {
      * @return
      */
     @RequestMapping(value = "/meeting", method = RequestMethod.POST)
-    public ReturnMsg meetings(HttpServletRequest request, @RequestParam(required = false, value = "data") String data) {
+    public ReturnMsg meetings(HttpServletRequest request, @RequestParam(required = false, value = "data") String data
+            , @RequestParam(required = false, value = "mail_name") String mail_name) {
         ReturnMsg returnMsg = new ReturnMsg();
         returnMsg.setType("meeting");
         try {
@@ -204,9 +219,15 @@ public class MenuController {
                 returnMsg.setResp("session已过期");
                 return returnMsg;
             } else {
-                User user = (User) session.getAttribute("user");
-                returnMsg.setResp(jdbcMysql_78.getMeeting(user.getMail_name(), data));
-                logger.info("查询会议列表成功.data:" + data + " userName:" + user.getMail_name());
+                String name = "";
+                if (!StringUtils.isEmpty(mail_name)) {
+                    name = mail_name;
+                } else {
+                    User user = (User) session.getAttribute("user");
+                    name = user.getMail_name();
+                }
+                returnMsg.setResp(jdbcMysql_78.getMeeting(name, data));
+                logger.info("查询会议列表成功.data:" + data + " userName:" + name);
                 return returnMsg;
             }
         } catch (Exception e) {
@@ -225,7 +246,8 @@ public class MenuController {
      * @return
      */
     @RequestMapping(value = "/schedule", method = RequestMethod.POST)
-    public ReturnMsg schedules(HttpServletRequest request, @RequestParam(required = false, value = "data") String data) {
+    public ReturnMsg schedules(HttpServletRequest request, @RequestParam(required = false, value = "data") String data
+            , @RequestParam(required = false, value = "mail_name") String mail_name) {
         ReturnMsg returnMsg = new ReturnMsg();
         returnMsg.setType("schedule");
         try {
@@ -235,9 +257,15 @@ public class MenuController {
                 returnMsg.setResp("session已过期");
                 return returnMsg;
             } else {
-                User user = (User) session.getAttribute("user");
-                returnMsg.setResp(jdbcMysql_78.getCalendar(user.getMail_name(), data));
-                logger.info("查询日程列表成功.user:" + user.getMail_name() + " date:" + data);
+                String name = "";
+                if (!StringUtils.isEmpty(mail_name)) {
+                    name = mail_name;
+                } else {
+                    User user = (User) session.getAttribute("user");
+                    name = user.getMail_name();
+                }
+                returnMsg.setResp(jdbcMysql_78.getCalendar(name, data));
+                logger.info("查询日程列表成功.user:" + name + " date:" + data);
                 return returnMsg;
             }
         } catch (Exception e) {
@@ -257,7 +285,7 @@ public class MenuController {
      * @return
      */
     @RequestMapping(value = "/review", method = RequestMethod.POST)
-    public ReturnMsg review(HttpServletRequest request) {
+    public ReturnMsg review(HttpServletRequest request,@RequestParam(required = false, value = "mail_name") String mail_name) {
         ReturnMsg returnMsg = new ReturnMsg();
         returnMsg.setType("toRead");
         try {
@@ -266,10 +294,16 @@ public class MenuController {
                 returnMsg.setStatus(-1);
                 returnMsg.setResp("session已过期");
             } else {
-                User user = (User) session.getAttribute("user");
-                returnMsg.setResp(jdbcMysql_78.queryReview(user.getMail_name()));
+                String name = "";
+                if (!StringUtils.isEmpty(mail_name)) {
+                    name = mail_name;
+                } else {
+                    User user = (User) session.getAttribute("user");
+                    name = user.getMail_name();
+                }
+                returnMsg.setResp(jdbcMysql_78.queryReview(name));
                 returnMsg.setStatus(0);
-                logger.info("查询待阅列表成功.userName:" + user.getMail_name());
+                logger.info("查询待阅列表成功.userName:" + name);
             }
         } catch (Exception e) {
             returnMsg.setStatus(-1);
@@ -309,7 +343,7 @@ public class MenuController {
      * @return
      */
     @RequestMapping(value = "/approvalprogress", method = RequestMethod.POST)
-    public ReturnMsg approvalprogress(HttpServletRequest request) {
+    public ReturnMsg approvalprogress(HttpServletRequest request, @RequestParam(required = false, value = "mail_name") String mail_name) {
         ReturnMsg returnMsg = new ReturnMsg();
         returnMsg.setType("approvalprogress");
         try {
@@ -319,10 +353,16 @@ public class MenuController {
                 returnMsg.setResp("session已过期");
                 return returnMsg;
             } else {
-                User user = (User) session.getAttribute("user");
-                returnMsg.setResp(jdbcMysql_78.queryApprovalList(user.getMail_name()));
+                String name = "";
+                if (!StringUtils.isEmpty(mail_name)) {
+                    name = mail_name;
+                } else {
+                    User user = (User) session.getAttribute("user");
+                    name = user.getMail_name();
+                }
+                returnMsg.setResp(jdbcMysql_78.queryApprovalList(name));
                 returnMsg.setStatus(0);
-                logger.info("查询审批列表成功.user:" + user.getMail_name());
+                logger.info("查询审批列表成功.user:" + name);
             }
         } catch (Exception e) {
             returnMsg.setStatus(-1);

@@ -8,9 +8,9 @@ public class SaturationMsg {
     private String sat_date;
     private double saturation;
     private String month;
-    private Integer mon_kaoqin_days;
-    private double mon_meeting_times;
-    private double mon_avg_saturation;
+    private Integer mon_kaoqin_days=0;
+    private double mon_meeting_times=0;
+    private double mon_avg_saturation=0;
 
     public SaturationMsg() {
     }

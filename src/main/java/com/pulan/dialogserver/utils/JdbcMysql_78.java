@@ -35,11 +35,15 @@ public class JdbcMysql_78 {
         if (date == null || date == "") {
             date = simpleDateFormat.format(new Date());
         }
+        String dateval = "%Y-%m";
+        if (date != null && date.length()>7) {
+            dateval = "%Y-%m-%d";
+        }
         String sql = "SELECT mc.*,ma.mail_name,ma.meeting_title,ma.meeting_time,ma.meeting_place \n" +
                 "FROM `meeting_attend` ma,`meeting_info` mc\n" +
                 "WHERE ma.fd_meeting_id = mc.uuid\n" +
                 "AND  mail_name = ?\n" +
-                "AND  DATE_FORMAT(meeting_date,'%Y-%m') = ?  order by meeting_time desc\n";
+                "AND  DATE_FORMAT(meeting_date,'"+dateval+"') = ?  order by meeting_time desc\n";
         List<MeetingInfo> list = new ArrayList<>();
         SqlRowSet rs = jdbcTemplate.queryForRowSet(sql, mail_name, date);
         MeetingInfo meetingInfo = null;
@@ -206,10 +210,14 @@ public class JdbcMysql_78 {
      * @param mail_name
      * @return
      */
-    public List<TodoInfo> queryTodoList(String mail_name){
+    public List<TodoInfo> queryTodoList(String mail_name,String ... date){
+        String timepar = "";
+        if (date.length>0) {
+            timepar = " and DATE_FORMAT(doc_create_time,'%Y-%m-%d')='"+date[0]+"' ";
+        }
 
         String sql = "SELECT uuid,todo_type,fd_status,doc_create_time,fd_create_person_name,doc_subject FROM todo_info a LEFT JOIN " +
-                "current_todo_node b ON a.uuid = b.fd_id LEFT JOIN ai_user iu ON a.fd_create_person = iu.mail_name WHERE a.fd_status = '20' AND b.mail_name = ? " +
+                "current_todo_node b ON a.uuid = b.fd_id LEFT JOIN ai_user iu ON a.fd_create_person = iu.mail_name WHERE a.fd_status = '20' AND b.mail_name = ? " + timepar +
                 "order by doc_create_time desc";
         List<TodoInfo> list = new ArrayList<>();
         SqlRowSet rs = jdbcTemplate.queryForRowSet(sql, mail_name);

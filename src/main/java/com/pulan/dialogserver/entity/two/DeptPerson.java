@@ -6,6 +6,7 @@ package com.pulan.dialogserver.entity.two;
 public class DeptPerson {
 
     private String id;
+    private String pid;
     private String cnName;
     private String department;
     private String mobile;
@@ -31,6 +32,14 @@ public class DeptPerson {
         this.mobile = mobile;
         this.email = email;
         this.mailName = mailName;
+    }
+
+    public String getPid() {
+        return pid;
+    }
+
+    public void setPid(String pid) {
+        this.pid = pid;
     }
 
     public String getId() {

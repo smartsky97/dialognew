@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.pulan.dialogserver.api.RobotRequest;
 import com.pulan.dialogserver.config.SysConfig;
-import com.pulan.dialogserver.entity.AiUserLocation;
 import com.pulan.dialogserver.entity.tulin.*;
 import com.pulan.dialogserver.service.IFlyService;
 import com.pulan.dialogserver.service.ITuLingService;
@@ -16,11 +15,9 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import sun.security.provider.MD5;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class TuLingServiceImpl implements ITuLingService {

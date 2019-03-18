@@ -2,6 +2,7 @@ package com.pulan.dialogserver.utils;
 
 import com.alibaba.fastjson.JSONObject;
 import com.pulan.dialogserver.entity.*;
+import com.pulan.dialogserver.entity.two.DeptPerson;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -397,5 +398,32 @@ public class JdbcUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * 获取公司部门人员结构
+     * @return
+     */
+    public List<DeptPerson> getDepartmentPersonnel() {
+
+        String sql ="SELECT a.id id,d.id pid,a.cn_name cn_name,a.department,a.mobile,a.email,a.mail_name mail_name " +
+                "FROM department_index d,ai_user a WHERE d.department=a.department " +
+                "UNION SELECT id,pid,'' cn_name,department,'' mobile,'' email,'' mail_name FROM department_index";
+        SqlRowSet rs = jdbcTemplate.queryForRowSet(sql);
+        List<DeptPerson> list = new ArrayList<>();
+        DeptPerson deptPerson = null;
+        while (rs.next()) {
+            deptPerson = new DeptPerson();
+            deptPerson.setId(rs.getString(1));
+            deptPerson.setPid(rs.getString(2));
+            deptPerson.setCnName(rs.getString(3));
+            deptPerson.setDepartment(rs.getString(4));
+            deptPerson.setMobile(rs.getString(5));
+            deptPerson.setEmail(rs.getString(6));
+            deptPerson.setMailName(rs.getString(7));
+            list.add(deptPerson);
+        }
+
+        return list;
     }
 }

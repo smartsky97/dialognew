@@ -8,7 +8,6 @@ import com.pulan.dialogserver.service.IFlyService;
 import com.pulan.dialogserver.service.IRedisService;
 import com.pulan.dialogserver.utils.baidutts.DemoException;
 import com.pulan.dialogserver.utils.baidutts.TtsUtils;
-import com.sun.org.apache.xml.internal.serializer.ToTextSAXHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;

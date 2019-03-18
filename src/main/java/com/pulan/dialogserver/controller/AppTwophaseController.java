@@ -6,6 +6,7 @@ import com.pulan.dialogserver.entity.resp.ReturnMsg;
 import com.pulan.dialogserver.entity.two.EmailInfo;
 import com.pulan.dialogserver.entity.two.Mettings;
 import com.pulan.dialogserver.utils.JdbcMysql_78;
+import com.pulan.dialogserver.utils.JdbcUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -24,6 +25,8 @@ public class AppTwophaseController {
 
     @Autowired
     private JdbcMysql_78 jdbcMysql_78;
+    @Autowired
+    private JdbcUtils jdbcUtils;
     /**
      * 获取会议地点
      * @param
@@ -103,7 +106,8 @@ public class AppTwophaseController {
         ReturnMsg returnMsg = new ReturnMsg();
         try {
             returnMsg.setStatus(0);
-            returnMsg.setResp(jdbcMysql_78.getDepartmentPersonnel());
+//            returnMsg.setResp(jdbcMysql_78.getDepartmentPersonnel());
+            returnMsg.setResp(jdbcUtils.getDepartmentPersonnel());
             returnMsg.setType("DepartmentPersonnel");
         }catch (Exception e){
             returnMsg.setStatus(-1);

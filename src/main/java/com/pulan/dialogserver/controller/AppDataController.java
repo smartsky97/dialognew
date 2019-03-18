@@ -268,9 +268,11 @@ public class AppDataController {
     @RequestMapping(value = "/sendEmailTo")
     public Object sendEmailTo(@RequestParam("mailtoken") String mailtoken, @RequestParam("to") String to, @RequestParam(value = "cc",required = false) String cc,
                               @RequestParam("title") String title, @RequestParam("text") String text) {
+        logger.info("参数："+to);
+        logger.info("参数："+cc);
         String sendemail = "http://192.168.0.67:9104/jq-exchange/send";
-
-        String[] tos = to.split(";");
+        mailtoken = "de4fb61f13024063ab7fa3a6b957be8d";
+        String[] tos = to.split(",");
         StringBuffer sb = new StringBuffer();
         sb.append("[");
         for (int i=0;i<tos.length;i++){
@@ -284,7 +286,7 @@ public class AppDataController {
 
         StringBuffer ccbuffer = new StringBuffer();
         if (!StringUtils.isEmpty(cc)) {
-            String[] ccs = to.split(";");
+            String[] ccs = to.split(",");
             ccbuffer.append("[");
             for (int i=0;i<ccs.length;i++){
                 if (i==ccs.length-1) {
