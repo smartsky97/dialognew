@@ -8,9 +8,11 @@ import com.pulan.dialogserver.entity.two.Mettings;
 import com.pulan.dialogserver.utils.JdbcMysql_78;
 import com.pulan.dialogserver.utils.JdbcUtils;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.ibatis.annotations.Param;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -106,8 +108,31 @@ public class AppTwophaseController {
         ReturnMsg returnMsg = new ReturnMsg();
         try {
             returnMsg.setStatus(0);
+            returnMsg.setResp(jdbcMysql_78.getDepartmentPersonnel());
+            returnMsg.setType("DepartmentPersonnel");
+        }catch (Exception e){
+            returnMsg.setStatus(-1);
+            returnMsg.setResp("获取部门员工出错");
+            returnMsg.setType("DepartmentPersonnel");
+            return returnMsg;
+        }
+        return returnMsg;
+    }
+    /**
+     * 获取公司相关部门人员
+     * @param
+     * @return
+     */
+    @RequestMapping(value = "/getDepartmentPersonnelById")
+    public Object getDepartmentPersonnelById(@RequestParam(value = "id",required = false)String id) {
+        ReturnMsg returnMsg = new ReturnMsg();
+        try {
+            returnMsg.setStatus(0);
 //            returnMsg.setResp(jdbcMysql_78.getDepartmentPersonnel());
-            returnMsg.setResp(jdbcUtils.getDepartmentPersonnel());
+            if (StringUtils.isEmpty(id)) {
+                id = "-1";
+            }
+            returnMsg.setResp(jdbcUtils.getDepartmentPersonnel(id));
             returnMsg.setType("DepartmentPersonnel");
         }catch (Exception e){
             returnMsg.setStatus(-1);

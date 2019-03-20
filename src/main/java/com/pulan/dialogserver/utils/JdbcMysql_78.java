@@ -162,9 +162,14 @@ public class JdbcMysql_78 {
      * @param mail_name
      * @return
      */
-    public List<ReviewMsg> queryReview(String mail_name) {
+    public List<ReviewMsg> queryReview(String mail_name,String ... date) {
+        String timepar = "";
+        if (date.length>0) {
+            timepar = " and DATE_FORMAT(doc_create_time,'%Y-%m-%d')='"+date[0]+"' ";
+        }
         String sql = "SELECT uuid,au.cn_name mail_name,doc_create_time,fd_type,fd_subject,fd_status FROM to_be_read br LEFT JOIN " +
-                "ai_user au ON br.mail_name = au.mail_name WHERE fd_status = '0' AND br.mail_name = ?  order by doc_create_time desc";
+                "ai_user au ON br.mail_name = au.mail_name WHERE fd_status = '0' AND br.mail_name = ?  " + timepar +
+                "order by doc_create_time desc";
         List<ReviewMsg> list = new ArrayList<>();
         SqlRowSet rs = jdbcTemplate.queryForRowSet(sql, mail_name);
         ReviewMsg reviewMsg = null;

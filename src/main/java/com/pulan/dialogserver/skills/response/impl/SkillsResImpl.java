@@ -676,7 +676,7 @@ public class SkillsResImpl implements ISkillsResService {
             mailtoken = jsonObject.get("data").toString();
         }*/
         //TODO 上线后需要改回来
-        mailtoken = "de4fb61f13024063ab7fa3a6b957be8d";
+        mailtoken = "443992d71adb44aa98e028400e970e26";
         String sendemail = "http://192.168.0.67:9104/jq-exchange/send";
 
         String[] tos = to;
@@ -1113,7 +1113,12 @@ public class SkillsResImpl implements ISkillsResService {
                     break;
                 case "review":
                     returnMsg.setType("toRead");
-                    List<ReviewMsg> reviewMsgList = jdbcMysql_78.queryReview(info[2]);
+                    try {
+                        date = DateUtils.getStringForDateString(info[3], "yyyyMMdd", "yyyy-MM-dd");
+                    }catch (Exception e){
+                        date =simpleDateFormat.format(new Date());
+                    }
+                    List<ReviewMsg> reviewMsgList = jdbcMysql_78.queryReview(info[2],date);
                     if (reviewMsgList == null) {
                         returnMsg.setResp("暂无数据");
                     } else {

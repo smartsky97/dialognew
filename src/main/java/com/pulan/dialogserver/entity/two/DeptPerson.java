@@ -1,8 +1,11 @@
 package com.pulan.dialogserver.entity.two;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * 公司部门人员信息
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class DeptPerson {
 
     private String id;

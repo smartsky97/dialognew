@@ -63,9 +63,12 @@ public class MultiDialogServiceImpl implements IMultiDialogService {
         try {
             String awaken = jdbcUtils.getAwakenWord();
             JSONObject msgObj = JSON.parseObject(msgData);
-            String type = msgObj.getString("type"); // 返回语言/文字的类型。
-            String voicetext = msgObj.getString("resp"); // 文本内容（标识语意槽修改，手动输入，值为input）
-            String open_id = msgObj.getString("open_id"); // 设备编号 opend_id
+            // 返回语言/文字的类型。
+            String type = msgObj.getString("type");
+            // 文本内容（标识语意槽修改，手动输入，值为input）
+            String voicetext = msgObj.getString("resp");
+            // 设备编号 opend_id
+            String open_id = msgObj.getString("open_id");
             String sure = msgObj.getString("sure");
      //       String inslot_type = msgObj.getString("slot_type"); //语意槽类型。
             // 如果语音内容是 你可以做什么
@@ -210,8 +213,6 @@ public class MultiDialogServiceImpl implements IMultiDialogService {
                                                         } else if (unameList.size() == 1) { //一个人名
                                                             sst.setSlotValue(unameList.get(0));
                                                         } else {  //没有找到人名
-                                                            //todo 推荐一个相识人名
-
                                                             result.put("resp", "抱歉，没有找到关于'" + slot_value + "'的人员信息，请重试要查询的人名！");
                                                             result.put("type", "text");
                                                             result.put("content", voicetext);
@@ -300,7 +301,8 @@ public class MultiDialogServiceImpl implements IMultiDialogService {
                     for (int i = 0; i < secondSSot.size(); i++) {
                         SemanticSlots smst = secondSSot.get(i);
                         String slot_value = smst.getSlotValue();
-                        //循环遍历模板将第一个为空的语意槽的问题返回。
+                        // 在处理相应逻辑之前，查看是否为修改之前语句中错误的字
+
                         if (StringUtils.isEmpty(slot_value)) {
                             // 在下一个空槽时返回问题给用户回答
                             if (find) {
@@ -317,6 +319,7 @@ public class MultiDialogServiceImpl implements IMultiDialogService {
                                     if (StringUtils.isEmpty(mail)) {
                                         result.put("resp", "抱歉，没有找到关于'" + voicetext + "'的人员信息，请重试要查询的人名！");
                                         result.put("type", "try");
+                                        result.put("type", "text");
                                         result.put("content", voicetext);
                                         result.put("data_type", smst.getSlotName());
                                         smst.setSlotValue("");
@@ -437,38 +440,39 @@ public class MultiDialogServiceImpl implements IMultiDialogService {
                                                         String[] s=name.toArray(array);
                                                         List<SimilarNameUtils.Score> scores = SimilarNameUtils.getSingle().search(s,voicetext,1);
                                                         //找到相似的人名
-                                                        if (scores != null && scores.size() > 0) {
-                                                            SimilarNameUtils.Score people = scores.get(0);
-                                                            //相似度小于10
-                                                            if (people.score<10) {
-                                                                //jp修改部分
-                                                                phone = jdbcUtils.getPhoneByCnName(people.word+"");
-                                                                smst.setSlotValue(phone);
-                                                                secondSSot.add(i, smst);
-                                                                secondSSot.remove(i + 1);
-                                                            } else{
-                                                                result.put("resp", "抱歉，没有找到关于'" + voicetext + "'的人员信息，请重试要查询的人名！");
-                                                                result.put("type", "try");
-                                                                result.put("content", voicetext);
-                                                                result.put("data_type", inslot_type);
-                                                                smst.setSlotValue("");
-                                                                int try_times = smst.getTryCount();
-                                                                smst.setTryCount(try_times - 1);
-                                                                secondSSot.add(i, smst);
-                                                                secondSSot.remove(i + 1);
-                                                                isBreak = true;
-                                                                if (try_times <= 0) {
-                                                                    result.put("resp", "抱歉，花花已经很努力了还是没有找到关于'" + voicetext + "'的人员信息，本轮会话结束！");
-                                                                    result.put("type", "text");
-                                                                    isError = true;
-                                                                } else {
-                                                                    result.put("data_type", inslot_type);
-                                                                    isTryAgain = true;
-                                                                }
-                                                            }
-                                                        } else {
+//                                                        if (scores != null && scores.size() > 0) {
+//                                                            SimilarNameUtils.Score people = scores.get(0);
+//                                                            //相似度小于10
+//                                                            if (people.score<10) {
+//                                                                //jp修改部分
+//                                                                phone = jdbcUtils.getPhoneByCnName(people.word+"");
+//                                                                smst.setSlotValue(phone);
+//                                                                secondSSot.add(i, smst);
+//                                                                secondSSot.remove(i + 1);
+//                                                            } else{
+//                                                                result.put("resp", "抱歉，没有找到关于'" + voicetext + "'的人员信息，请重试要查询的人名！");
+//                                                                result.put("type", "try");
+//                                                                result.put("content", voicetext);
+//                                                                result.put("data_type", inslot_type);
+//                                                                smst.setSlotValue("");
+//                                                                int try_times = smst.getTryCount();
+//                                                                smst.setTryCount(try_times - 1);
+//                                                                secondSSot.add(i, smst);
+//                                                                secondSSot.remove(i + 1);
+//                                                                isBreak = true;
+//                                                                if (try_times <= 0) {
+//                                                                    result.put("resp", "抱歉，花花已经很努力了还是没有找到关于'" + voicetext + "'的人员信息，本轮会话结束！");
+//                                                                    result.put("type", "text");
+//                                                                    isError = true;
+//                                                                } else {
+//                                                                    result.put("data_type", inslot_type);
+//                                                                    isTryAgain = true;
+//                                                                }
+//                                                            }
+//                                                        } else {
                                                             result.put("resp", "抱歉，没有找到关于'" + voicetext + "'的人员信息，请重试要查询的人名！");
                                                             result.put("type", "try");
+                                                            result.put("type", "text");
                                                             result.put("content", voicetext);
                                                             result.put("data_type", inslot_type);
                                                             smst.setSlotValue("");
@@ -485,7 +489,7 @@ public class MultiDialogServiceImpl implements IMultiDialogService {
                                                                 result.put("data_type", inslot_type);
                                                                 isTryAgain = true;
                                                             }
-                                                        }
+//                                                        }
                                                     }
                                                 } else {
                                                     if (voicetext.contains("我")) { //人名是否包含我
@@ -541,7 +545,7 @@ public class MultiDialogServiceImpl implements IMultiDialogService {
                                                                 String[] s=name.toArray(array);
                                                                 List<SimilarNameUtils.Score> scores = SimilarNameUtils.getSingle().search(s,voicetext,1);
                                                                 //找到相似的人名
-                                                                if (scores != null && scores.size() > 0) {
+                                                                /*if (scores != null && scores.size() > 0) {
                                                                     SimilarNameUtils.Score people = scores.get(0);
                                                                     //相似度小于10
                                                                     if (people.score<10) {
@@ -581,9 +585,10 @@ public class MultiDialogServiceImpl implements IMultiDialogService {
                                                                             isTryAgain = true;
                                                                         }
                                                                     }
-                                                                } else {
+                                                                } else {*/
                                                                     result.put("resp", "抱歉，没有找到关于'" + personName + "'的人员信息，请重试要查询的人名！");
                                                                     result.put("type", "try");
+                                                                    result.put("type", "text");
                                                                     result.put("content", personName);
                                                                     result.put("data_type", inslot_type);
                                                                     smst.setSlotValue("");
@@ -600,7 +605,7 @@ public class MultiDialogServiceImpl implements IMultiDialogService {
                                                                         result.put("data_type", inslot_type);
                                                                         isTryAgain = true;
                                                                     }
-                                                                }
+                                                               /* }*/
                                                             }
 //                                                            } else {
 //                                                                if ("Attendance".equals(smst.getTemplateService())
@@ -642,6 +647,7 @@ public class MultiDialogServiceImpl implements IMultiDialogService {
                                                                 }else{
                                                                     result.put("resp", "抱歉，没有找到关于'" + voicetext + "'的人员信息，请重试要查询的人名！");
                                                                     result.put("type", "try");
+                                                                    result.put("type", "text");
                                                                     result.put("content", voicetext);
                                                                     result.put("data_type", inslot_type);
                                                                     smst.setSlotValue("");
@@ -677,6 +683,7 @@ public class MultiDialogServiceImpl implements IMultiDialogService {
                                                 } else {
                                                     result.put("resp", "抱歉，您提供的'" + voicetext + "'和要求的语义槽格式不匹配，请重试！");
                                                     result.put("type", "try");
+                                                    result.put("type", "text");
                                                     int try_times = smst.getTryCount();
                                                     smst.setTryCount(try_times - 1);
                                                     smst.setSlotValue("");
@@ -698,6 +705,18 @@ public class MultiDialogServiceImpl implements IMultiDialogService {
                                 }
                                 redisClient.saveSemanticModel(1, converKey, secondSSot);
                                 find = true;
+                            }
+                        } else {
+                            //循环遍历模板将第一个为空的语意槽的问题返回。
+                            if (!StringUtils.isEmpty(msgObj.get("editAble")) && "true".equals(msgObj.get("editAble"))) {
+                                // 旧的值和当前语句中的值相等，把新的值赋予到redis中
+                                if (slot_value.equals(msgObj.get("oldDbDate"))) {
+                                    smst.setSlotValue(voicetext);
+                                    secondSSot.add(i, smst);
+                                    secondSSot.remove(i + 1);
+                                    redisClient.saveSemanticModel(1, converKey, secondSSot);
+                                    find = true;
+                                }
                             }
                         }
                         if (isBreak) {

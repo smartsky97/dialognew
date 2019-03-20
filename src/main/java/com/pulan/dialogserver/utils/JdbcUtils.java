@@ -404,11 +404,28 @@ public class JdbcUtils {
      * 获取公司部门人员结构
      * @return
      */
-    public List<DeptPerson> getDepartmentPersonnel() {
+    public List<DeptPerson> getDepartmentPersonnel(String id) {
 
-        String sql ="SELECT a.id id,d.id pid,a.cn_name cn_name,a.department,a.mobile,a.email,a.mail_name mail_name " +
-                "FROM department_index d,ai_user a WHERE d.department=a.department " +
-                "UNION SELECT id,pid,'' cn_name,department,'' mobile,'' email,'' mail_name FROM department_index";
+        String sql ="SELECT\n" +
+                "\tid,\n" +
+                "\tpid,\n" +
+                "\tdepartment cn_name,\n" +
+                "\tdepartment,\n" +
+                "\t'' mobile,\n" +
+                "\t'' email,\n" +
+                "\t'' mail_name \n" +
+                "FROM\n" +
+                "\tdepartment_index d \n" +
+                "WHERE\n" +
+                "\td.pid = "+id+" \n" +
+                "UNION\n" +
+                "SELECT\n" +
+                "\ta.id id,d.id pid,a.cn_name cn_name,a.department,a.mobile,a.email,a.mail_name mail_name\n" +
+                "FROM\n" +
+                "\tdepartment_index d,ai_user a\n" +
+                "WHERE\n" +
+                "\td.department IN ( SELECT department FROM department_index d WHERE d.id ="+id+" )\n" +
+                "\tand d.department=a.department";
         SqlRowSet rs = jdbcTemplate.queryForRowSet(sql);
         List<DeptPerson> list = new ArrayList<>();
         DeptPerson deptPerson = null;
