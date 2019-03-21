@@ -762,7 +762,7 @@ public class SkillsResImpl implements ISkillsResService {
                     case "person":
                         remindObj.put("alias", my_imei);
                         break;
-                    case "datetime":
+                    case "date":
                         slot_value = slot.getSlotValue();
                         String pattern = "\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}";
                         boolean isMatch = Pattern.matches(pattern, slot_value);
