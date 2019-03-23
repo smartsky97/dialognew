@@ -3,6 +3,7 @@ package com.pulan.dialogserver.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.pulan.dialogserver.entity.resp.ReturnMsg;
+import com.pulan.dialogserver.entity.two.DeptPerson;
 import com.pulan.dialogserver.entity.two.EmailInfo;
 import com.pulan.dialogserver.entity.two.Mettings;
 import com.pulan.dialogserver.utils.JdbcMysql_78;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/message")
@@ -108,7 +110,7 @@ public class AppTwophaseController {
         ReturnMsg returnMsg = new ReturnMsg();
         try {
             returnMsg.setStatus(0);
-            returnMsg.setResp(jdbcMysql_78.getDepartmentPersonnel());
+            returnMsg.setResp(jdbcUtils.getDepartmentPersonnel());
             returnMsg.setType("DepartmentPersonnel");
         }catch (Exception e){
             returnMsg.setStatus(-1);
@@ -119,28 +121,51 @@ public class AppTwophaseController {
         return returnMsg;
     }
     /**
-     * 获取公司相关部门人员
+     * 获取公司部门结构
      * @param
      * @return
      */
     @RequestMapping(value = "/getDepartmentPersonnelById")
-    public Object getDepartmentPersonnelById(@RequestParam(value = "id",required = false)String id) {
+    public Object getDepartmentPersonnelById() {
         ReturnMsg returnMsg = new ReturnMsg();
         try {
             returnMsg.setStatus(0);
 //            returnMsg.setResp(jdbcMysql_78.getDepartmentPersonnel());
-            if (StringUtils.isEmpty(id)) {
-                id = "-1";
-            }
-            returnMsg.setResp(jdbcUtils.getDepartmentPersonnel(id));
+            List<DeptPerson> deptPersonList = jdbcUtils.getDepartment();
+            List<DeptPerson> resu = deptPersonList.stream().filter(i -> i.getPid().equals("-1")).collect(Collectors.toList());
+            resu = findChild(deptPersonList,resu);
+            returnMsg.setResp(resu);
             returnMsg.setType("DepartmentPersonnel");
         }catch (Exception e){
+            logger.info(e);
             returnMsg.setStatus(-1);
             returnMsg.setResp("获取部门员工出错");
             returnMsg.setType("DepartmentPersonnel");
             return returnMsg;
         }
         return returnMsg;
+    }
+
+    private List<DeptPerson> findChild(List<DeptPerson> param,List<DeptPerson> result) {
+        //1.遍历结果集，查找是否有下级部门
+        int ii=0;
+        for (int i=0;i<result.size();i++) {
+            for(int j=0;j<param.size();j++) {
+                if (result.get(i).getId().equals(param.get(j).getPid()) && param.get(j).skip) {
+                    System.out.println(ii);
+                    ii++;
+                    if (null== result.get(i).getDepartments()) {
+                        result.get(i).setDepartments(new ArrayList<>());
+                    }
+                    result.get(i).getDepartments().add(param.get(j));
+                    param.get(j).skip = false;
+                    findChild(param,result.get(i).getDepartments());
+                }
+            }
+        }
+        //2.找到下级部门，查看这个部门时候有下级部门，找到后，删除当前数据
+        System.out.println();
+        return result;
     }
 
     /**

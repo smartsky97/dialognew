@@ -527,7 +527,7 @@ public class JdbcMysql_78 {
      */
     public List<DeptPerson> getDepartmentPersonnel() {
 
-        String sql =" SELECT  id ,cn_name,department,mobile,email,mail_name FROM `ai_user` ";
+        String sql =" SELECT  id ,cn_name,department,mobile,email,mail_name FROM `ai_user`";
         SqlRowSet rs = jdbcTemplate.queryForRowSet(sql);
         List<DeptPerson> list = new ArrayList<>();
         DeptPerson deptPerson = null;

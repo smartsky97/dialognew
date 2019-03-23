@@ -676,7 +676,7 @@ public class SkillsResImpl implements ISkillsResService {
             mailtoken = jsonObject.get("data").toString();
         }*/
         //TODO 上线后需要改回来
-        mailtoken = "443992d71adb44aa98e028400e970e26";
+        mailtoken = "c1407764650842ad83284330cf84e9b4";
         String sendemail = "http://192.168.0.67:9104/jq-exchange/send";
 
         String[] tos = to;

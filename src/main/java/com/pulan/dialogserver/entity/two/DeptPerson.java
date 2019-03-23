@@ -1,6 +1,9 @@
 package com.pulan.dialogserver.entity.two;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import java.util.List;
 
 /**
  * 公司部门人员信息
@@ -15,7 +18,9 @@ public class DeptPerson {
     private String mobile;
     private String email;
     private String mailName;
-
+    private List<DeptPerson> departments;
+    @JsonIgnore
+    public boolean skip = true;
 
     public DeptPerson() {
     }
@@ -91,5 +96,13 @@ public class DeptPerson {
 
     public void setMailName(String mailName) {
         this.mailName = mailName;
+    }
+
+    public List<DeptPerson> getDepartments() {
+        return departments;
+    }
+
+    public void setDepartments(List<DeptPerson> departments) {
+        this.departments = departments;
     }
 }

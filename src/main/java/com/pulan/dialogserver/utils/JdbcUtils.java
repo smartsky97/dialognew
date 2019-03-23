@@ -404,28 +404,15 @@ public class JdbcUtils {
      * 获取公司部门人员结构
      * @return
      */
-    public List<DeptPerson> getDepartmentPersonnel(String id) {
+    public List<DeptPerson> getDepartmentPersonnel() {
 
-        String sql ="SELECT\n" +
-                "\tid,\n" +
-                "\tpid,\n" +
-                "\tdepartment cn_name,\n" +
-                "\tdepartment,\n" +
-                "\t'' mobile,\n" +
-                "\t'' email,\n" +
-                "\t'' mail_name \n" +
-                "FROM\n" +
-                "\tdepartment_index d \n" +
-                "WHERE\n" +
-                "\td.pid = "+id+" \n" +
-                "UNION\n" +
-                "SELECT\n" +
-                "\ta.id id,d.id pid,a.cn_name cn_name,a.department,a.mobile,a.email,a.mail_name mail_name\n" +
-                "FROM\n" +
-                "\tdepartment_index d,ai_user a\n" +
-                "WHERE\n" +
-                "\td.department IN ( SELECT department FROM department_index d WHERE d.id ="+id+" )\n" +
-                "\tand d.department=a.department";
+        String sql =
+                "SELECT " +
+                "a.id id,d.id pid,a.cn_name cn_name,a.department,a.mobile,a.email,a.mail_name mail_name " +
+                "FROM " +
+                "department_index d,ai_user a " +
+                "WHERE " +
+                " d.department=a.department";
         SqlRowSet rs = jdbcTemplate.queryForRowSet(sql);
         List<DeptPerson> list = new ArrayList<>();
         DeptPerson deptPerson = null;
@@ -438,6 +425,27 @@ public class JdbcUtils {
             deptPerson.setMobile(rs.getString(5));
             deptPerson.setEmail(rs.getString(6));
             deptPerson.setMailName(rs.getString(7));
+            list.add(deptPerson);
+        }
+
+        return list;
+    }
+    /**
+     * 获取公司部门人员结构
+     * @return
+     */
+    public List<DeptPerson> getDepartment() {
+
+        String sql ="SELECT  id,pid,department cn_name,department  FROM  department_index";
+        SqlRowSet rs = jdbcTemplate.queryForRowSet(sql);
+        List<DeptPerson> list = new ArrayList<>();
+        DeptPerson deptPerson = null;
+        while (rs.next()) {
+            deptPerson = new DeptPerson();
+            deptPerson.setId(rs.getString(1));
+            deptPerson.setPid(rs.getString(2));
+            deptPerson.setCnName(rs.getString(3));
+            deptPerson.setDepartment(rs.getString(4));
             list.add(deptPerson);
         }
 

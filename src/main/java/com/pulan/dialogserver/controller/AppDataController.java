@@ -271,7 +271,7 @@ public class AppDataController {
         logger.info("参数："+to);
         logger.info("参数："+cc);
         String sendemail = "http://192.168.0.67:9104/jq-exchange/send";
-        mailtoken = "443992d71adb44aa98e028400e970e26";
+        mailtoken = "c1407764650842ad83284330cf84e9b4";
         String[] tos = to.split(",");
         StringBuffer sb = new StringBuffer();
         sb.append("[");
