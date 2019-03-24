@@ -293,6 +293,7 @@ public class MultiDialogServiceImpl implements IMultiDialogService {
                 } else {
                     // 反问用户相关语义槽的值，填充redis存储的回话对象。
                     boolean find = false; // 是否找到对应值的空槽
+                    boolean changed = false;// 若是安卓请求修改之前的值
                     List<SemanticSlots> secondSSot = JSON.parseArray(converModel, SemanticSlots.class); // 获取用户上次模板对话内容转换 list
                     isSlotNull = false;
                     boolean isBreak = false;
@@ -303,7 +304,19 @@ public class MultiDialogServiceImpl implements IMultiDialogService {
                         String slot_value = smst.getSlotValue();
                         // 在处理相应逻辑之前，查看是否为修改之前语句中错误的字
 
-                        if (StringUtils.isEmpty(slot_value)) {
+                        //循环遍历模板将第一个为空的语意槽的问题返回。
+                        if (!StringUtils.isEmpty(msgObj.get("editAble")) && "true".equals(msgObj.get("editAble"))) {
+                            // 旧的值和当前语句中的值相等，把新的值赋予到redis中
+                            if (slot_value.equals(msgObj.get("oldDbDate"))) {
+                                smst.setSlotValue(voicetext);
+                                secondSSot.add(i, smst);
+                                secondSSot.remove(i + 1);
+                                redisClient.saveSemanticModel(1, converKey, secondSSot);
+                                find = true;
+                                changed = true;
+                            }
+                        }
+                        if (StringUtils.isEmpty(slot_value) && !changed) {
                             // 在下一个空槽时返回问题给用户回答
                             if (find) {
                                 result.put("resp", smst.getPrompt());
@@ -705,18 +718,6 @@ public class MultiDialogServiceImpl implements IMultiDialogService {
                                 }
                                 redisClient.saveSemanticModel(1, converKey, secondSSot);
                                 find = true;
-                            }
-                        } else {
-                            //循环遍历模板将第一个为空的语意槽的问题返回。
-                            if (!StringUtils.isEmpty(msgObj.get("editAble")) && "true".equals(msgObj.get("editAble"))) {
-                                // 旧的值和当前语句中的值相等，把新的值赋予到redis中
-                                if (slot_value.equals(msgObj.get("oldDbDate"))) {
-                                    smst.setSlotValue(voicetext);
-                                    secondSSot.add(i, smst);
-                                    secondSSot.remove(i + 1);
-                                    redisClient.saveSemanticModel(1, converKey, secondSSot);
-                                    find = true;
-                                }
                             }
                         }
                         if (isBreak) {
