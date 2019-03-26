@@ -80,10 +80,10 @@ public class AppShiroController {
 				JSONObject jsonObject1 = JSON.parseObject(httpClient.postRequest(toeken, toekenbody));
 				System.out.println(jsonObject1);
 				if(jsonObject1!=null){
-					if (null!=jsonObject1.get("code") && !jsonObject1.get("code").equals("1000")) {
+					if (null!=jsonObject1.get("code") && !jsonObject1.get("code").toString().equals("1000")) {
 						mailToken =  "error："+jsonObject1.get("message");
 					} else {
-						mailToken = jsonObject1.get("jsonObject1").toString();
+						mailToken = jsonObject1.get("data").toString();
 						//接下来用token再去验证
 						String now_url = "http://192.168.0.67:9104/jq-exchange/pc/login-V2";
 						String body = "{\"accessToken\":\""+mailToken+"\",\"emailAddress\":\""+user.getEmail()+"\",\"userCode\":\""+username+"\"}";
@@ -91,7 +91,7 @@ public class AppShiroController {
 						JSONObject jsonObject = JSON.parseObject(httpClient.postRequest(now_url, body));
 						System.out.println(jsonObject);
 						if(jsonObject!=null){
-							if (null!=jsonObject.get("code") && !jsonObject.get("code").equals("1000")) {
+							if (null!=jsonObject.get("code") && !jsonObject.get("code").toString().equals("1000")) {
 								mailToken =  "error："+jsonObject.get("message");
 							} else {
 								mailToken = jsonObject.get("data").toString();
