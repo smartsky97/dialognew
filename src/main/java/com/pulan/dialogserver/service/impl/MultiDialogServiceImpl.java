@@ -166,7 +166,6 @@ public class MultiDialogServiceImpl implements IMultiDialogService {
                                                 sst.setSlotValue(phone);
                                             } else {  //没有找到人名
                                                 //todo 推荐一个相识人名
-
                                                 result.put("resp", "抱歉，没有找到关于'" + voicetext + "'的人员信息，请重试要查询的人名！");
                                                 result.put("type", "text");
                                                 result.put("content", voicetext);
@@ -299,21 +298,31 @@ public class MultiDialogServiceImpl implements IMultiDialogService {
                     boolean isBreak = false;
                     boolean isError = false;
                     boolean isTryAgain = false;
+                    boolean inchanged = false;//表示是否进入过  循环遍历模板将第一个为空的语意槽的问题返回。   这块代码
                     for (int i = 0; i < secondSSot.size(); i++) {
                         SemanticSlots smst = secondSSot.get(i);
                         String slot_value = smst.getSlotValue();
                         // 在处理相应逻辑之前，查看是否为修改之前语句中错误的字
 
                         //循环遍历模板将第一个为空的语意槽的问题返回。
-                        if (!StringUtils.isEmpty(msgObj.get("editAble")) && "true".equals(msgObj.get("editAble"))) {
+                        if (!StringUtils.isEmpty(msgObj.get("editAble")) && "true".equals(msgObj.get("editAble").toString()) && !inchanged) {
                             // 旧的值和当前语句中的值相等，把新的值赋予到redis中
-                            if (slot_value.equals(msgObj.get("oldDbDate"))) {
-                                smst.setSlotValue(voicetext);
-                                secondSSot.add(i, smst);
-                                secondSSot.remove(i + 1);
-                                redisClient.saveSemanticModel(1, converKey, secondSSot);
-                                find = true;
-                                changed = true;
+                            if (slot_value != null && slot_value.equals(msgObj.get("oldDbDate")) || (slot_value.equals("我")&&msgObj.get("oldDbDate").toString().contains("我"))) {
+                                //当问到邮件、发短信、查快递时，不修改，执行下面的逻辑
+                                if ("106100".equals(smst.getSlotId()) || "115101".equals(smst.getSlotId()) || "108100".equals(smst.getSlotId())) {
+                                    smst.setSlotValue("");
+                                    slot_value = "";
+                                } else {
+                                    smst.setSlotValue(voicetext);
+                                    secondSSot.add(i, smst);
+                                    secondSSot.remove(i + 1);
+                                    redisClient.saveSemanticModel(1, converKey, secondSSot);
+                                    find = true;
+                                    changed = true;
+                                    isBreak = true;
+                                    isSlotNull = true;
+                                }
+                                inchanged = true;
                             }
                         }
                         if (StringUtils.isEmpty(slot_value) && !changed) {
@@ -443,6 +452,8 @@ public class MultiDialogServiceImpl implements IMultiDialogService {
                                                         redisClient.del(1,converKey);
                                                     } else if (unameList.size() == 1) { //一个人名
                                                         phone = jdbcUtils.getPhoneByCnName(unameList.get(0));
+                                                        //用于安卓端使用修改上次对话功能时使用
+                                                        result.put("oldDbDate",phone);
                                                         smst.setSlotValue(phone);
                                                         secondSSot.add(i, smst);
                                                         secondSSot.remove(i + 1);
@@ -545,8 +556,11 @@ public class MultiDialogServiceImpl implements IMultiDialogService {
 //                                                                || ("Meeting".equals(smst.getTemplateService())&& "meeting_person".equals(smst.getSlotCode()))
                                                                 ) {
                                                                     smst.setSlotValue(personName);
+                                                                    result.put("",personName);
                                                                 } else {
                                                                     smst.setSlotValue(email_name);
+                                                                    //用于安卓端使用修改上次对话功能时使用
+                                                                    result.put("oldDbDate",email_name);
                                                                 }
 
                                                                 secondSSot.add(i, smst);
@@ -691,6 +705,8 @@ public class MultiDialogServiceImpl implements IMultiDialogService {
                                                 String slotValue = iSlotsReplaceService.slotInputReplace(voicetext, smst.getUtterance(), inslot_type);
                                                 if (slotValue != null) {
                                                     smst.setSlotValue(slotValue);
+                                                    //用于安卓端使用修改上次对话功能时使用
+                                                    result.put("oldDbDate",slotValue);
                                                     secondSSot.add(i, smst);
                                                     secondSSot.remove(i + 1);
                                                 } else {

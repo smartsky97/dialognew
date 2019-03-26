@@ -662,7 +662,7 @@ public class SkillsResImpl implements ISkillsResService {
         String text = secondSSot.get(2).getSlotValue();
         String userCode = to[0].split("@")[0];
 
-        // 先获取token 测试时，暂时写死
+        // 先获取token 测试时，暂时写死,现在把token存到session中，使用时，直接去获取即可
         /*String now_url = "http://192.168.0.67:9104/jq-exchange/pc/login-V2";
         String body = "{\"accessToken\":\""+mailtoken+"\",\"emailAddress\":\""+to[0]+"\",\"userCode\":\""+userCode+"\"}";
         System.out.println(body);
@@ -676,7 +676,13 @@ public class SkillsResImpl implements ISkillsResService {
             mailtoken = jsonObject.get("data").toString();
         }*/
         //TODO 上线后需要改回来
-        mailtoken = "c1407764650842ad83284330cf84e9b4";
+//        mailtoken = "c1407764650842ad83284330cf84e9b4";
+        if (mailtoken.startsWith("error")) {
+            JSONObject jsonObject2 = new JSONObject();
+            jsonObject2.put("resp", mailtoken);
+            jsonObject2.put("type", "text");
+            return jsonObject2;
+        }
         String sendemail = "http://192.168.0.67:9104/jq-exchange/send";
 
         String[] tos = to;

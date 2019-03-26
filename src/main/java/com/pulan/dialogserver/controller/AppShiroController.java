@@ -3,10 +3,8 @@ package com.pulan.dialogserver.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.pulan.dialogserver.shiro.entity.User;
-import com.pulan.dialogserver.utils.Constants;
-import com.pulan.dialogserver.utils.DESPlus;
-import com.pulan.dialogserver.utils.JdbcUtils;
-import com.pulan.dialogserver.utils.ShiroDao;
+import com.pulan.dialogserver.utils.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -24,6 +22,8 @@ public class AppShiroController {
 	@Autowired
 	private JdbcUtils jdbcUtils;
 	DESPlus desPlus = new DESPlus("aec504733cfb4112");
+	@Autowired
+	private HttpClient httpClient;
 
 	@Autowired
 	private ShiroDao shiroDao;
@@ -59,6 +59,7 @@ public class AppShiroController {
 	public JSONObject isRegisterIMEI(@RequestBody String msgData, HttpSession session){
 			JSONObject ret = new JSONObject();
 			JSONObject msgObj = JSON.parseObject(msgData);
+			logger.info("登录传递参数："+msgObj);
 			String username = msgObj.getString("username");
 			String password = msgObj.getString("password");
 			String imei = msgObj.getString("imei");
@@ -71,6 +72,40 @@ public class AppShiroController {
 			jdbcUtils.registImei(imei, username, desPlus.encrypt(password));
 			User user = (User) subject.getPrincipal();
 			user.setImei(imei);
+			if (!StringUtils.isEmpty(mailToken)) {
+				//先获取token
+				String toeken = "http://210.75.8.38:9104/jq-exchange/ic/login ";
+				String toekenbody = mailToken;
+				System.out.println(toekenbody);
+				JSONObject jsonObject1 = JSON.parseObject(httpClient.postRequest(toeken, toekenbody));
+				System.out.println(jsonObject1);
+				if(jsonObject1!=null){
+					if (null!=jsonObject1.get("code") && !jsonObject1.get("code").equals("1000")) {
+						mailToken =  "error："+jsonObject1.get("message");
+					} else {
+						mailToken = jsonObject1.get("jsonObject1").toString();
+						//接下来用token再去验证
+						String now_url = "http://192.168.0.67:9104/jq-exchange/pc/login-V2";
+						String body = "{\"accessToken\":\""+mailToken+"\",\"emailAddress\":\""+user.getEmail()+"\",\"userCode\":\""+username+"\"}";
+						System.out.println(body);
+						JSONObject jsonObject = JSON.parseObject(httpClient.postRequest(now_url, body));
+						System.out.println(jsonObject);
+						if(jsonObject!=null){
+							if (null!=jsonObject.get("code") && !jsonObject.get("code").equals("1000")) {
+								mailToken =  "error："+jsonObject.get("message");
+							} else {
+								mailToken = jsonObject.get("data").toString();
+							}
+						}else{
+							mailToken = "error：发送邮件失败";
+						}
+					}
+				}else{
+					mailToken = "error：发送邮件失败";
+				}
+			} else {
+				mailToken = "error：该用户没有设置邮箱";
+			}
 			user.setMail_token(mailToken);
 		//	logger.info("UserRegist:"+user.toString());
 			session.setAttribute("user", user);
@@ -81,6 +116,7 @@ public class AppShiroController {
 			return ret;
 		} catch (Exception e) {
 			// TODO: handle exception
+			logger.error("登录失败：",e);
 			ret.put("resp", "登录失败");
 			return ret;
 		}

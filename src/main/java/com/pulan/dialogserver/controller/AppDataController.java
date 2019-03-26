@@ -266,73 +266,100 @@ public class AppDataController {
 
     //发送邮件
     @RequestMapping(value = "/sendEmailTo")
-    public Object sendEmailTo(@RequestParam("mailtoken") String mailtoken, @RequestParam("to") String to, @RequestParam(value = "cc",required = false) String cc,
-                              @RequestParam("title") String title, @RequestParam("text") String text) {
-        logger.info("参数："+to);
-        logger.info("参数："+cc);
-        String sendemail = "http://192.168.0.67:9104/jq-exchange/send";
-        mailtoken = "c1407764650842ad83284330cf84e9b4";
-        String[] tos = to.split(",");
-        StringBuffer sb = new StringBuffer();
-        sb.append("[");
-        for (int i=0;i<tos.length;i++){
-            if (i==tos.length-1) {
-                sb.append("{\"address\":\""+tos[i]+"\"}");
-            }else {
-                sb.append("{\"address\":\""+tos[i]+"\"},");
-            }
-        }
-        sb.append("]");
-
-        StringBuffer ccbuffer = new StringBuffer();
-        if (!StringUtils.isEmpty(cc)) {
-            String[] ccs = to.split(",");
-            ccbuffer.append("[");
-            for (int i=0;i<ccs.length;i++){
-                if (i==ccs.length-1) {
-                    ccbuffer.append("{\"address\":\""+ccs[i]+"\"}");
-                }else {
-                    ccbuffer.append("{\"address\":\""+ccs[i]+"\"},");
+    public Object sendEmailTo(@RequestParam(value = "mailtoken",required = false) String mailtoken, @RequestParam("to") String to, @RequestParam(value = "cc",required = false) String cc,
+                              @RequestParam("title") String title, @RequestParam("text") String text, HttpServletRequest request) {
+        ReturnMsg returnMsg = new ReturnMsg();
+        returnMsg.setType("sendEmailTo");
+        try {
+            HttpSession session = request.getSession(false);
+            if (session == null) {
+                returnMsg.setStatus(-1);
+                returnMsg.setResp("session已过期");
+                return returnMsg;
+            } else {
+                User user = (User) session.getAttribute("user");
+                mailtoken = user.getMail_token();
+                logger.info("参数mailtoken："+mailtoken);
+                logger.info("参数to："+to);
+                logger.info("参数cc："+cc);
+                if (mailtoken.startsWith("error")) {
+                    JSONObject jsonObject2 = new JSONObject();
+                    jsonObject2.put("resp", mailtoken);
+                    jsonObject2.put("type", "text");
+                    return jsonObject2;
                 }
+                String sendemail = "http://192.168.0.67:9104/jq-exchange/send";
+                //TODO 上线后需要改回来
+//                mailtoken = "c1407764650842ad83284330cf84e9b4";
+                String[] tos = to.split(",");
+                StringBuffer sb = new StringBuffer();
+                sb.append("[");
+                for (int i=0;i<tos.length;i++){
+                    if (i==tos.length-1) {
+                        sb.append("{\"address\":\""+tos[i]+"\"}");
+                    }else {
+                        sb.append("{\"address\":\""+tos[i]+"\"},");
+                    }
+                }
+                sb.append("]");
+
+                StringBuffer ccbuffer = new StringBuffer();
+                if (!StringUtils.isEmpty(cc)) {
+                    String[] ccs = to.split(",");
+                    ccbuffer.append("[");
+                    for (int i=0;i<ccs.length;i++){
+                        if (i==ccs.length-1) {
+                            ccbuffer.append("{\"address\":\""+ccs[i]+"\"}");
+                        }else {
+                            ccbuffer.append("{\"address\":\""+ccs[i]+"\"},");
+                        }
+                    }
+                    ccbuffer.append("]");
+                }
+
+                StringBuffer buffer = new StringBuffer();
+                buffer.append("------footfoodapplicationrequestnetwork\r\n");
+                buffer.append("Content-Disposition: form-data; name=\"");
+                buffer.append("toRecipients");
+                buffer.append("\"\r\n\r\n");
+                buffer.append(sb.toString());
+                buffer.append("\r\n");
+
+                if (!StringUtils.isEmpty(cc)) {
+                    buffer.append("------footfoodapplicationrequestnetwork\r\n");
+                    buffer.append("Content-Disposition: form-data; name=\"");
+                    buffer.append("ccRecipients");
+                    buffer.append("\"\r\n\r\n");
+                    buffer.append(ccbuffer.toString());
+                    buffer.append("\r\n");
+                }
+
+                buffer.append("------footfoodapplicationrequestnetwork\r\n");
+                buffer.append("Content-Disposition: form-data; name=\"");
+                buffer.append("subject");
+                buffer.append("\"\r\n\r\n");
+                buffer.append(title);
+                buffer.append("\r\n");
+
+                buffer.append("------footfoodapplicationrequestnetwork\r\n");
+                buffer.append("Content-Disposition: form-data; name=\"");
+                buffer.append("messageBody");
+                buffer.append("\"\r\n\r\n");
+                buffer.append(text);
+                buffer.append("\r\n");
+
+                buffer.append("------footfoodapplicationrequestnetwork--\r\n");
+
+                JSONObject jsonObject = JSON.parseObject(httpClient.postRequest(sendemail, buffer.toString(),"multipart/form-data",mailtoken));
+                logger.info("邮件信息："+jsonObject.toJSONString());
+                return jsonObject;
             }
-            ccbuffer.append("]");
+
+        } catch (Exception e) {
+            returnMsg.setStatus(-1);
+            returnMsg.setType("sendEmailTo");
+            returnMsg.setResp("出现异常");
+            return returnMsg;
         }
-
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("------footfoodapplicationrequestnetwork\r\n");
-        buffer.append("Content-Disposition: form-data; name=\"");
-        buffer.append("toRecipients");
-        buffer.append("\"\r\n\r\n");
-        buffer.append(sb.toString());
-        buffer.append("\r\n");
-
-        if (!StringUtils.isEmpty(cc)) {
-            buffer.append("------footfoodapplicationrequestnetwork\r\n");
-            buffer.append("Content-Disposition: form-data; name=\"");
-            buffer.append("ccRecipients");
-            buffer.append("\"\r\n\r\n");
-            buffer.append(ccbuffer.toString());
-            buffer.append("\r\n");
-        }
-
-        buffer.append("------footfoodapplicationrequestnetwork\r\n");
-        buffer.append("Content-Disposition: form-data; name=\"");
-        buffer.append("subject");
-        buffer.append("\"\r\n\r\n");
-        buffer.append(title);
-        buffer.append("\r\n");
-
-        buffer.append("------footfoodapplicationrequestnetwork\r\n");
-        buffer.append("Content-Disposition: form-data; name=\"");
-        buffer.append("messageBody");
-        buffer.append("\"\r\n\r\n");
-        buffer.append(text);
-        buffer.append("\r\n");
-
-        buffer.append("------footfoodapplicationrequestnetwork--\r\n");
-
-        JSONObject jsonObject = JSON.parseObject(httpClient.postRequest(sendemail, buffer.toString(),"multipart/form-data",mailtoken));
-        logger.info("邮件信息："+jsonObject.toJSONString());
-        return jsonObject;
     }
 }
