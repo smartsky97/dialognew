@@ -74,7 +74,7 @@ public class AppShiroController {
 			user.setImei(imei);
 			if (!StringUtils.isEmpty(mailToken)) {
 				//先获取token
-				String toeken = "http://210.75.8.38:9104/jq-exchange/ic/login ";
+				String toeken = "http://210.75.8.38:9104/jq-exchange/ic/login";
 				String toekenbody = mailToken;
 				System.out.println(toekenbody);
 				JSONObject jsonObject1 = JSON.parseObject(httpClient.postRequest(toeken, toekenbody));
@@ -85,7 +85,7 @@ public class AppShiroController {
 					} else {
 						mailToken = jsonObject1.get("data").toString();
 						//接下来用token再去验证
-						String now_url = "http://192.168.0.67:9104/jq-exchange/pc/login-V2";
+						/*String now_url = "http://192.168.0.67:9104/jq-exchange/pc/login-V2";
 						String body = "{\"accessToken\":\""+mailToken+"\",\"emailAddress\":\""+user.getEmail()+"\",\"userCode\":\""+username+"\"}";
 						System.out.println(body);
 						JSONObject jsonObject = JSON.parseObject(httpClient.postRequest(now_url, body));
@@ -98,7 +98,7 @@ public class AppShiroController {
 							}
 						}else{
 							mailToken = "error：发送邮件失败";
-						}
+						}*/
 					}
 				}else{
 					mailToken = "error：发送邮件失败";
